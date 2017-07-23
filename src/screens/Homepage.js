@@ -10,15 +10,10 @@ import {
   Dimensions,
   DeviceEventEmitter,
   ListView,
-  AsyncStorage
+  AsyncStorage,
 } from 'react-native';
 
-import Icon from 'react-native-vector-icons/FontAwesome';
-import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import { Button } from 'react-native-elements';
-import * as Animatable from 'react-native-animatable';
-import MapView from 'react-native-maps';
+import { Icon } from 'react-native-elements';
 import moment from 'moment';
 import PushNotification from 'react-native-push-notification';
 import Beacons  from 'react-native-beacons-manager';
@@ -26,7 +21,7 @@ import DeviceInfo from 'react-native-device-info';
 import fetch from 'react-native-fetch-polyfill';
 import RNFS from 'react-native-fs';
 import * as Progress from 'react-native-progress';
-// import 'whatwg-fetch';
+import Display from 'react-native-display';
 
 
 
@@ -37,10 +32,11 @@ export default class Homepage extends Component {
       added: false,
       data: [],
       acessos:[],
-      totalProgress:0,
-      progress:0,
-      progresso:0.0001,
+      totalOfImages:0,
+      imagesDownloaded:0,
+      progressBar:0.0001,
 			rangingDataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows([]),
+      enable: true,
     }
   }
 
@@ -59,49 +55,47 @@ export default class Homepage extends Component {
             '@Data:Monuments',
             JSON.stringify(res)
           )
-          console.log('************************************************************Guardou os dados')
+          console.log(RNFS.DocumentDirectoryPath);
+          let x = this.state.data.length-1;
+          let y = this.state.data[x].monuments.length-1;
+          let z = this.state.data[x].monuments[y].pois.length-1;
 
-          //Vai gravar as imagens
+          //Apagar imagens
           {this.state.data.map((i, indexCategorias) => i.monuments.map((j, indexMonuments) => j.pois.map((k, indexPois) => {
             let imgMonumento = false;
             let imgPoi = false;
             RNFS.readDir(RNFS.DocumentDirectoryPath) // On Android, use "RNFS.DocumentDirectoryPath" (MainBundlePath is not defined)
-              .then((result) => {
+            .then((result) => {
+              if (result.length !== 1){
+
                 result.map((i, index) => {
-                  if(('monumento_' + j.id + '.jpg') == i.name){
+                  if((i.name == 'monumento_' + j.image_md5 + '.jpg') ){
                     imgMonumento = true;
                   }
 
-                  if('poi_' + k.id + '.jpg' == i.name){
+                  if(i.name == 'poi_' + k.image_md5 + '.jpg'){
                     imgPoi = true;
                   }
 
                   if(index == result.length-1 && imgMonumento == false){
-                    this.setState({totalProgress: this.state.totalProgress+1, added:true})
-                    RNFS.downloadFile({
-                      fromUrl: j.image,
-                      toFile: `${RNFS.DocumentDirectoryPath}/monumento_`+ j.id + `.jpg`,
-                    }).promise.then((r) => {
-                          this.setState({progress: this.state.progress+1})
-                          console.log(r)
-                          console.log('Progresso:' + this.state.progress + ' de ' + this.state.totalProgress)
+                    RNFS.unlink(RNFS.DocumentDirectoryPath + '/' + i.name)
+                      .then(() => {
+                        console.log('FILE DELETED');
+                      })
+                      // `unlink` will throw an error, if the item to unlink does not exist
+                      .catch((err) => {
+                        console.log('Erro a apagar as imagens:', err.message);
                       });
                   }
 
                   if(index == result.length-1 && imgPoi == false){
-                    this.setState({totalProgress: this.state.totalProgress+1, added:true})
-                    RNFS.downloadFile({
-                      fromUrl: k.image,
-                      toFile: `${RNFS.DocumentDirectoryPath}/poi_`+ k.id + `.jpg`,
-                    }).promise.then((r) => {
-                          this.setState({progress: this.state.progress+1})
-                          console.log(r)
-                          console.log('Progresso:' + this.state.progress + ' de ' + this.state.totalProgress)
-                          this.setState({progresso:(((this.state.progress*100)/this.state.totalProgress)/100)});
-                          if(this.state.progresso == 1){
-                            console.log('***********************************Vai mudar de scene*********************************')
-                            navigate('Monumento', {data:this.state.data})
-                          }
+                    RNFS.unlink(RNFS.DocumentDirectoryPath + '/' + i.name)
+                      .then(() => {
+                        console.log('FILE DELETED');
+                      })
+                      // `unlink` will throw an error, if the item to unlink does not exist
+                      .catch((err) => {
+                        console.log('Erro a apagar as imagens:', err.message);
                       });
                   }
 
@@ -113,72 +107,64 @@ export default class Homepage extends Component {
                     imgPoi = false;
                   }
 
-                  let x = this.state.data.length-1;
-                  let y = this.state.data[x].monuments.length-1;
-                  let z = this.state.data[x].monuments[y].pois.length-1;
-
-
-                  if(indexCategorias==x && indexMonuments==y && indexPois==z && index == result.length-1 && this.state.added==false){
-                      navigate('Monumento', {data:this.state.data})
-                  }
-
-
-
-                })
-              })
-          })))}
-
-          //Vai apagar as imagens guardadas
-        {this.state.data.map((i, indexCategorias) => i.monuments.map((j, indexMonuments) => j.pois.map((k, indexPois) => {
-          let imgMonumento2 = false;
-          let imgPoi2 = false;
-          RNFS.readDir(RNFS.DocumentDirectoryPath) // On Android, use "RNFS.DocumentDirectoryPath" (MainBundlePath is not defined)
-            .then((result) => {
-              if (result.length !== 1){
-
-                result.map((i, index) => {
-                  if((i.name == 'monumento_' + j.id + '.jpg') ){
-                    imgMonumento2 = true;
-                  }
-
-                  if(i.name == 'poi_' + k.id + '.jpg'){
-                    imgPoi2 = true;
-                  }
-
-                  if(index == result.length-1 && imgMonumento2 == false){
-                    RNFS.unlink(RNFS.DocumentDirectoryPath + '/' + i.name)
-                      .then(() => {
-                        console.log('FILE DELETED');
-                      })
-                      // `unlink` will throw an error, if the item to unlink does not exist
-                      .catch((err) => {
-                        console.log('Erro a apagar as imagens:', err.message);
-                      });
-                  }
-
-                  if(index == result.length-1 && imgPoi2 == false){
-                    RNFS.unlink(RNFS.DocumentDirectoryPath + '/' + i.name)
-                      .then(() => {
-                        console.log('FILE DELETED');
-                      })
-                      // `unlink` will throw an error, if the item to unlink does not exist
-                      .catch((err) => {
-                        console.log('Erro a apagar as imagens:', err.message);
-                      });
-                  }
-
-                  if(index == result.length-1 && imgMonumento2 == true){
-                    imgMonumento2 = false;
-                  }
-
-                  if(index == result.length-1 && imgPoi2 == true){
-                    imgPoi2 = false;
-                  }
-
                 }) //fim do map function
               } //fim do if result.length
             }) //fim do .then(result)
           })))}
+
+
+          //Guardar imagens
+          {this.state.data.map((i, indexCategorias) => i.monuments.map((j, indexMonuments) => j.pois.map((k, indexPois) => {
+            RNFS.exists(RNFS.DocumentDirectoryPath + '/monumento_' + j.image_md5 + '.jpg')
+              .then((success) => {
+                if (success == false){
+                  this.setState({totalOfImages: this.state.totalOfImages+1, added:true, enable:false})
+                  RNFS.downloadFile({
+                    fromUrl: j.image,
+                    toFile: `${RNFS.DocumentDirectoryPath}/monumento_`+ j.image_md5 + `.jpg`,
+                  }).promise.then((r) => {
+                      this.setState({imagesDownloaded: this.state.imagesDownloaded+1})
+                      if(this.state.progressBar == 1){
+                        this.setState({added:false})
+                      }
+                    });
+                }
+              })
+              .catch((err) => {
+                console.log('Erro', err);
+              });
+
+              RNFS.exists(RNFS.DocumentDirectoryPath + '/poi_' + k.image_md5 + '.jpg')
+                .then((success) => {
+                  if (success == false){
+                    this.setState({totalOfImages: this.state.totalOfImages+1, added:true, enable:false})
+                    RNFS.downloadFile({
+                      fromUrl: k.image,
+                      toFile: `${RNFS.DocumentDirectoryPath}/poi_`+ k.image_md5 + `.jpg`,
+                    }).promise.then((r) => {
+
+                          this.setState({imagesDownloaded: this.state.imagesDownloaded+1})
+                          this.setState({progressBar:(((this.state.imagesDownloaded*100)/this.state.totalOfImages)/100)});
+                          if(this.state.progressBar == 1){
+                            this.setState({added:false})
+                            // navigate('Monumento', {data:this.state.data})
+                          }
+                      });
+                  }
+
+                  if(indexCategorias==x && indexMonuments==y && indexPois==z && this.state.added==false){
+                      // navigate('Monumento', {data:this.state.data})
+                      this.setState({enable:false})
+
+                  }
+
+                })
+                .catch((err) => {
+                  console.log('Erro', err);
+                });
+          })))}
+
+
 
         })
       })
@@ -192,10 +178,9 @@ export default class Homepage extends Component {
   						const monuments = JSON.parse(dados)
   						this.setState({
   							data: monuments,
-                fetching: false
+                added: false,
+                enable: false,
   						})
-              console.log('********************************************************Carregou os dados');
-              navigate('Monumento', {data:this.state.data})
   					}
   				}
   			)
@@ -215,16 +200,14 @@ export default class Homepage extends Component {
   						console.error('Error loading monuments', err)
   					} else {
   						const dataSync = JSON.parse(dados)
-              console.log('********************************************************Carregou os dados');
               {dataSync.map(i => i.monuments.map(j => j.pois.map((k, index) => {
                 if (notification.message == k.name){
-                  navigate('MonumentoDetails', {monumento:j});
+                  navigate('MonumentoDetails', {monumento:j, swiperIndex: index});
                 }
               })))}
   					}
   				}
   			)
-        // console.log( 'NOTIFICATION:', notification );
       },
 
       // Should the initial notification be popped automatically
@@ -242,7 +225,6 @@ export default class Homepage extends Component {
 
 
     // -- BEACON DETECTION ---------------------------------------------- BEACON DETECTION --
-    // start iBeacon detection (later will add Eddystone and Nordic Semiconductor beacons)
     Beacons.detectIBeacons();
     Beacons.setBackgroundScanPeriod(30000);
     // Range beacons inside the region
@@ -252,11 +234,7 @@ export default class Homepage extends Component {
      .catch(error => console.log(`Beacons ranging not started, error: ${error}`));
 
     DeviceEventEmitter.addListener('beaconsDidRange',(data) => {
-      //  console.log('Data.Beacons: ', data);
        this.setState({ rangingDataSource: this.state.rangingDataSource.cloneWithRows(data.beacons) });
-
-      //  console.log('Beacons: ',this.state.rangingDataSource.getRowCount());
-      //  console.log('*******ACESSOS:', this.state.acessos);
 
       if(this.state.rangingDataSource.getRowCount() !== 0){
         let date = moment().add(20, 's');
@@ -307,7 +285,6 @@ export default class Homepage extends Component {
                   //Caso já esteja na ultima posição do array acessos e a flag 'acedeu' ainda estiver false
                   //então é porque o beacon não está no array acessos logo será inserido
                   if(indexAcesso === (this.state.acessos.length-1) && acedeu === false){
-                    console.log("Vai adicionar um elemento ao array dos acessos");
                     this.state.acessos.push({'uuid': beacon.uuid, 'date': date});
                     this.setState({acessos: this.state.acessos});
 
@@ -337,7 +314,6 @@ export default class Homepage extends Component {
       this.state.acessos.map((acesso, index) => {
         let date = acesso.date;
         if(moment().isAfter(date)){
-          console.log("Vai remover um elemento ao array dos acessos");
           this.state.acessos.splice(index, 1);
           this.setState({acessos: this.state.acessos});
         }
@@ -346,8 +322,7 @@ export default class Homepage extends Component {
   }
 
   postFunction(k){
-    console.log('ID do PoI: ', k.id)
-    fetch('http://www.thomar.me:3000/accesses', {
+    fetch('http://www.thomar.me/accesses', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -366,39 +341,93 @@ export default class Homepage extends Component {
     })
   }
 
+  ready(){
+    if (this.state.added == false && this.state.enable == false) {
+      return true
+    } else {
+      return false
+    }
+  }
+
 
   render(){
     const {navigate} = this.props.navigation;
-    console.log('Progresso: ', this.state.progresso);
-
 
     return (
       <Image source={require('../config/pictures/tomar_centro.jpg')} style={styles.container}>
 
 
         <View style={styles.titulo}>
-          <Animatable.Text
-            style={styles.tituloText}
-            animation="pulse"
-            iterationCount="infinite"
-            duration={15000}
-          >
+          <Text style={styles.tituloText}>
             Tomar
-          </Animatable.Text>
+          </Text>
         </View>
 
-        <View style={styles.progressBar}>
-          <Progress.Bar
-            progress={this.state.progresso}
-            color={'rgba(0, 0, 0, 0.7)'}
-            borderWidth={4}
-            borderColor={'#000'}
-            height={50}
-            width={Dimensions.get('window').width - 15}
-          />
-          <Text style={styles.text}>
-            Loading...
-          </Text>
+        <ActivityIndicator
+          style={styles.spinner}
+          animating={this.state.enable}
+          size={100}
+          color='white'
+        />
+
+
+          <View style={styles.progressBar}>
+            <Display enable={this.state.added}>
+              <Progress.Bar
+                progress={this.state.progressBar}
+                color={'rgba(0, 0, 0, 0.7)'}
+                borderWidth={2}
+                borderColor={'#000'}
+                height={50}
+                unfilledColor={'rgba(0, 0, 0, 0)'}
+                width={Dimensions.get('window').width - 15}
+              />
+              <View style={{alignItems:'center'}}>
+                <Text style={styles.buttonText}>
+                  Loading...
+                </Text>
+              </View>
+
+            </Display>
+          </View>
+
+
+        <View style={styles.contentContainer}>
+          <Display
+            enable={this.ready()}
+          >
+            <View style={styles.buttonContent}>
+              <TouchableHighlight
+                onPress={() => navigate('MultiMap', {data:this.state.data})}
+                style={styles.button}
+                underlayColor='#075e54'
+              >
+                <View>
+                  <Icon
+                    name='place'
+                    color='#fff'
+                    size={34}
+                  />
+                  <Text style={styles.buttonText}>Mapa</Text>
+                </View>
+              </TouchableHighlight>
+
+              <TouchableHighlight
+                onPress={() => navigate('Monumento', {data:this.state.data})}
+                style={styles.button}
+                underlayColor='#075e54'
+              >
+                <View>
+                  <Icon
+                    name='account-balance'
+                    color='#fff'
+                    size={34}
+                  />
+                  <Text style={styles.buttonText}>Monumentos</Text>
+                </View>
+              </TouchableHighlight>
+            </View>
+          </Display>
         </View>
 
       </Image>
@@ -418,22 +447,10 @@ const styles = StyleSheet.create({
     width: null,
     height: null,
   },
-  progressBar:{
-    flex:5,
-    justifyContent: 'flex-end',
-    alignItems:'center',
-    marginBottom: 5,
-  },
-  //
-  // spinner:{
-  //   position: 'absolute',
-  //   height: Dimensions.get('window').height,
-  //   width: Dimensions.get('window').width
-  // },
 
   titulo:{
+    flex:2,
     marginTop:30,
-    flex:5,
     justifyContent: 'flex-start',
     alignItems: 'center',
   },
@@ -448,32 +465,55 @@ const styles = StyleSheet.create({
     textShadowRadius: 15,
   },
 
-  // contentContainer:{
-  //   flex:4,
-  //   justifyContent:'space-around',
-  //   flexDirection:'row',
-  //   alignItems:'flex-end'
-  // },
-  //
-  // button:{
-  //   flex:1,
-  //   backgroundColor:'rgba(0, 0, 0, 0.7)',
-  //   alignItems:'center',
-  //   justifyContent:'center',
-  //   elevation: 10,
-  //   height:100
-  // },
-  //
-  // buttonContent:{
-  //   flex:1,
-  //   flexDirection:'row',
-  //   alignSelf:'stretch',
-  //   alignItems:'center',
-  //   justifyContent:'center',
-  // },
-  //
+  progressBar:{
+    flex:2,
+    justifyContent: 'center',
+    alignItems:'center',
+    alignSelf:'center',
+  },
+
+  spinner:{
+    position: 'absolute',
+    height: Dimensions.get('window').height,
+    width: Dimensions.get('window').width
+  },
+
+  contentContainer:{
+    flex:1,
+    justifyContent:'flex-end',
+  },
+
+  buttonContent:{
+    flex:1,
+    flexDirection:'row',
+    alignSelf:'stretch',
+    alignItems:'flex-end',
+    justifyContent:'center',
+    margin:5,
+  },
+
+  button:{
+    flex:1,
+    backgroundColor:'rgba(7, 94, 84, 0.7)',
+    alignItems:'center',
+    justifyContent:'center',
+    borderWidth: 2,
+    borderColor: '#075e54',
+    elevation: 10,
+    height:100,
+    margin: 10,
+  },
+
+  buttonText:{
+    fontSize: 30,
+    fontWeight: '100',
+    fontFamily: 'ostrich-regular',
+    color: 'white',
+    marginTop: 10,
+  },
+
   text:{
-    color:'rgb(0,0,0)',
+    color:'#fff',
     fontSize: 24,
     fontWeight: 'normal',
     textAlign: 'center',
@@ -481,6 +521,3 @@ const styles = StyleSheet.create({
   }
 
 });
-
-
-// <Icon name="bank" color='rgba(255,255,255,0.7)' size={40} />

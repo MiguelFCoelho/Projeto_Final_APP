@@ -7,6 +7,7 @@ import{
 	Image,
 	TouchableHighlight,
 	Dimensions,
+	StatusBar,
 } from 'react-native';
 import {Button, List, ListItem, Icon} from 'react-native-elements';
 import {convento, museus, igrejas, locaisInteresse} from '../config/data';
@@ -22,7 +23,6 @@ class Convento extends Component{
 		const {navigate} = this.props.navigation;
 		const { data } = this.props.navigation.state.params;
 
-		console.log('API:', data);
 		return (
 			<View style={styles.container}>
 				<ScrollView>
@@ -34,7 +34,7 @@ class Convento extends Component{
 									style={styles.monumentoContainer}
 									key={index}
 								>
-									<Image style={styles.monumentoPic} source={{uri:`file://${RNFS.DocumentDirectoryPath}/monumento_`+ j.id + `.jpg`}}>
+									<Image style={styles.monumentoPic} source={{uri:`file://${RNFS.DocumentDirectoryPath}/monumento_`+ j.image_md5 + `.jpg`}}>
 										<View style={styles.monumentoTitleContainer}>
 											<Text style={styles.monumentoTitle}>{j.name}</Text>
 										</View>
@@ -67,7 +67,7 @@ class Museus extends Component{
 									style={styles.monumentoContainer}
 									key={index}
 								>
-									<Image style={styles.monumentoPic} source={{uri:`file://${RNFS.DocumentDirectoryPath}/monumento_`+ j.id + `.jpg`}}>
+									<Image style={styles.monumentoPic} source={{uri:`file://${RNFS.DocumentDirectoryPath}/monumento_`+ j.image_md5 + `.jpg`}}>
 										<View style={styles.monumentoTitleContainer}>
 											<Text style={styles.monumentoTitle}>{j.name}</Text>
 										</View>
@@ -100,7 +100,7 @@ class Igrejas extends Component{
 									style={styles.monumentoContainer}
 									key={index}
 								>
-									<Image style={styles.monumentoPic} source={{uri:`file://${RNFS.DocumentDirectoryPath}/monumento_`+ j.id + `.jpg`}}>
+									<Image style={styles.monumentoPic} source={{uri:`file://${RNFS.DocumentDirectoryPath}/monumento_`+ j.image_md5 + `.jpg`}}>
 										<View style={styles.monumentoTitleContainer}>
 											<Text style={styles.monumentoTitle}>{j.name}</Text>
 										</View>
@@ -134,7 +134,7 @@ class OutrosLocais extends Component{
 									style={styles.monumentoContainer}
 									key={index}
 								>
-									<Image style={styles.monumentoPic} source={{uri:`file://${RNFS.DocumentDirectoryPath}/monumento_`+ j.id + `.jpg`}}>
+									<Image style={styles.monumentoPic} source={{uri:`file://${RNFS.DocumentDirectoryPath}/monumento_`+ j.image_md5 + `.jpg`}}>
 										<View style={styles.monumentoTitleContainer}>
 											<Text style={styles.monumentoTitle}>{j.name}</Text>
 										</View>
@@ -208,7 +208,7 @@ export const Monumentos = TabNavigator({
 			backgroundColor:'white'
 		},
 		tabStyle:{
-			//height:(Dimensions.get('window').height/13),
+			height:60,
 
 		},
 		style:{
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
 	},
 	monumentoPic:{
 		justifyContent:'flex-end',
-		height:((Dimensions.get('window').height-(Dimensions.get('window').height/13))/3.5),
+		height:((Dimensions.get('window').height - StatusBar.currentHeight - 40 - 66)/3),
 		width:Dimensions.get('window').width,
 		resizeMode: 'cover'
 	},

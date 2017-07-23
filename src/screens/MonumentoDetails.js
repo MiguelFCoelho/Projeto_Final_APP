@@ -5,6 +5,7 @@ import{
 	View,
 	ScrollView,
 	TouchableHighlight,
+	StatusBar,
 } from 'react-native';
 import {Tile, List, ListItem, Icon} from 'react-native-elements';
 import * as Animatable from 'react-native-animatable';
@@ -20,13 +21,12 @@ export default class museuDetails extends Component{
 
 	render(){
 		const {navigate} = this.props.navigation;
-		const {monumento}  = this.props.navigation.state.params;
-
-		console.log('Details: ', monumento);
+		const {monumento, swiperIndex}  = this.props.navigation.state.params;
 
 		return (
 			<View style={styles.container}>
 						<Swiper
+							index={swiperIndex}
 							showsButtons={false}
 							paginationStyle={styles.paginationStyle}
 							activeDot={<View style={styles.activeDot}/>}
@@ -37,10 +37,10 @@ export default class museuDetails extends Component{
 						>
 							{monumento.pois.map((poi, index) => (
 
-								<View key={index} style={{flex:1, marginBottom: 60}}>
+								<View key={index} style={{flex:1, marginBottom: StatusBar.currentHeight + 40}}>
 									<ScrollView>
 										<Tile
-											imageSrc = {{uri:`file://${RNFS.DocumentDirectoryPath}/poi_`+ poi.id + `.jpg`}}
+											imageSrc = {{uri:`file://${RNFS.DocumentDirectoryPath}/poi_`+ poi.image_md5 + `.jpg`}}
 											contentContainerStyle = {{marginBottom: -30}}
 										/>
 
@@ -51,7 +51,7 @@ export default class museuDetails extends Component{
 											  name='location-on'
 											  color='#075e54'
 											  size={36}
-											  onPress={() => navigate('Mapa', {monumento: monumento})} />
+											  onPress={() => navigate('SingularMap', {monumento: monumento})} />
 										</View>
 
 										<View style={styles.titleContainer}>

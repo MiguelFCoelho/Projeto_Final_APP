@@ -12,6 +12,7 @@
     "react-native": "0.44.3",
     "react-native-animatable": "^1.2.1",
     "react-native-device-info": "^0.10.2",
+    "react-native-display": "^1.0.8",
     "react-native-elements": "^0.12.2",
     "react-native-fetch-polyfill": "^1.1.2",
     "react-native-fs": "^2.3.3",

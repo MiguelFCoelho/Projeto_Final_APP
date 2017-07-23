@@ -1,19 +1,30 @@
 import React, { Component } from 'react';
 import {
-  Image,              
-  StyleSheet,         
-  Text,               
-  View,               
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  TouchableHighlight,
 } from 'react-native';
 
 export default class Callout extends Component {
   render (){
-    const {name} = this.props;
+    const {navigate} = this.props.navigation;
+    const monumento = this.props.dados;
+
     return (
+
       <View style={styles.container}>
-        <View style={[styles.bubble, {backgroundColor:this.props.cor}]}>
-            <Text style={styles.name}>{name}</Text>
-        </View>  
+
+        <TouchableHighlight
+          onPress={() => navigate('MonumentoDetails', {monumento})}
+          style={[styles.bubble, {backgroundColor:this.props.cor}]}
+        >
+          <View>
+              <Text style={styles.name}>{monumento.name}</Text>
+          </View>
+        </TouchableHighlight>
+
         <View style={[styles.arrow, {borderTopColor:this.props.cor}]} />
       </View>
     );
