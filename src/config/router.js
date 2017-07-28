@@ -11,7 +11,8 @@ import Monumentos from '../screens/Monumento';
 import MonumentoDetails from '../screens/MonumentoDetails';
 import SingularMap from '../screens/SingularMap';
 import MultiMap from '../screens/MultiMap';
-import { StackNavigator} from 'react-navigation';
+import {Icon} from 'react-native-elements';
+import { StackNavigator } from 'react-navigation';
 
 
 export const Stack = StackNavigator({
@@ -23,7 +24,7 @@ export const Stack = StackNavigator({
   },
   Monumento: {
     screen: Monumentos,
-    navigationOptions: {
+    navigationOptions:{
       title:'Voltar atrás',
 
       headerStyle:{
@@ -40,9 +41,9 @@ export const Stack = StackNavigator({
       headerTintColor:'#fff',
     },
   },
-  MonumentoDetails: {
+  MonumentoDetails:{
     screen: MonumentoDetails,
-    navigationOptions: {
+    navigationOptions:{
 
       title:'Voltar atrás',
 
@@ -60,9 +61,9 @@ export const Stack = StackNavigator({
       headerTintColor:'#fff',
     },
   },
-  SingularMap: {
+  SingularMap:{
     screen: SingularMap,
-    navigationOptions: {
+    navigationOptions:{
 
       title:'Voltar atrás',
 
@@ -80,9 +81,10 @@ export const Stack = StackNavigator({
 
     },
   },
-  MultiMap: {
+  MultiMap:{
     screen: MultiMap,
-    navigationOptions: {
+    // navigationOptions: ({ navigation }) => ({
+    navigationOptions:{
 
       title:'Voltar atrás',
 
@@ -97,6 +99,14 @@ export const Stack = StackNavigator({
       },
 
       headerTintColor:'#fff',
+
+      // headerRight:(
+      //   <Icon
+      //     name='home'
+      //     color='white'
+      //     size={36}
+      //     onPress={() => navigation.navigate('Homepage')} />
+      // )
 
     },
   }

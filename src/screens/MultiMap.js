@@ -42,18 +42,11 @@ export default class Mapa extends Component {
       						pinColor='#009688'
       						key={index}
       					>
-                  <MapView.Callout tooltip style={styles.callout}>
+                  <MapView.Callout tooltip style={styles.callout} onPress={() => navigate('MonumentoDetails', {monumento:j})}>
                     <View style={styles.calloutContainer}>
-
-                      <TouchableHighlight
-                        onPress={() => navigate('MonumentoDetails')}
-                        style={[styles.bubble, {backgroundColor:'#009688'}]}
-                      >
-                        <View>
-                            <Text style={styles.name}>{j.name}</Text>
-                        </View>
-                      </TouchableHighlight>
-
+                      <View style={[styles.bubble, {backgroundColor:'#009688'}]}>
+                          <Text style={styles.name}>{j.name}</Text>
+                      </View>
                       <View style={[styles.arrow, {borderTopColor:'#009688'}]} />
                     </View>
                   </MapView.Callout>
@@ -70,18 +63,11 @@ export default class Mapa extends Component {
                    pinColor='#f44336'
                    key={index}
                  >
-                   <MapView.Callout tooltip style={styles.callout}>
+                   <MapView.Callout tooltip style={styles.callout} onPress={() => navigate('MonumentoDetails', {monumento:j})}>
                      <View style={styles.calloutContainer}>
-
-                       <TouchableHighlight
-                         onPress={() => navigate('MonumentoDetails')}
-                         style={[styles.bubble, {backgroundColor:'#f44336'}]}
-                       >
-                         <View>
+                         <View style={[styles.bubble, {backgroundColor:'#f44336'}]}>
                              <Text style={styles.name}>{j.name}</Text>
                          </View>
-                       </TouchableHighlight>
-
                        <View style={[styles.arrow, {borderTopColor:'#f44336'}]} />
                      </View>
                    </MapView.Callout>
@@ -98,18 +84,11 @@ export default class Mapa extends Component {
                    pinColor='#f39c12'
                    key={index}
                  >
-                   <MapView.Callout tooltip style={styles.callout}>
+                   <MapView.Callout tooltip style={styles.callout} onPress={() => navigate('MonumentoDetails', {monumento:j})}>
                      <View style={styles.calloutContainer}>
-
-                       <TouchableHighlight
-                         onPress={() => navigate('MonumentoDetails')}
-                         style={[styles.bubble, {backgroundColor:'#f39c12'}]}
-                       >
-                         <View>
-                             <Text style={styles.name}>{j.name}</Text>
-                         </View>
-                       </TouchableHighlight>
-
+                       <View style={[styles.bubble, {backgroundColor:'#f39c12'}]}>
+                           <Text style={styles.name}>{j.name}</Text>
+                       </View>
                        <View style={[styles.arrow, {borderTopColor:'#f39c12'}]} />
                      </View>
                    </MapView.Callout>
@@ -126,18 +105,11 @@ export default class Mapa extends Component {
                    pinColor='#8e44ad'
                    key={index}
                  >
-                   <MapView.Callout tooltip style={styles.callout}>
+                   <MapView.Callout tooltip style={styles.callout} onPress={() => navigate('MonumentoDetails', {monumento:j})}>
                      <View style={styles.calloutContainer}>
-
-                       <TouchableHighlight
-                         onPress={() => navigate('MonumentoDetails')}
-                         style={[styles.bubble, {backgroundColor:'#8e44ad'}]}
-                       >
-                         <View>
-                             <Text style={styles.name}>{j.name}</Text>
-                         </View>
-                       </TouchableHighlight>
-
+                       <View style={[styles.bubble, {backgroundColor:'#8e44ad'}]}>
+                           <Text style={styles.name}>{j.name}</Text>
+                       </View>
                        <View style={[styles.arrow, {borderTopColor:'#8e44ad'}]} />
                      </View>
                    </MapView.Callout>

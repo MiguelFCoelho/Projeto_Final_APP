@@ -11,6 +11,7 @@ import {
   DeviceEventEmitter,
   ListView,
   AsyncStorage,
+  Alert
 } from 'react-native';
 
 import { Icon } from 'react-native-elements';
@@ -22,6 +23,7 @@ import fetch from 'react-native-fetch-polyfill';
 import RNFS from 'react-native-fs';
 import * as Progress from 'react-native-progress';
 import Display from 'react-native-display';
+import { BluetoothManager as BluetoothStatus } from 'react-native-bluetooth-status';
 
 
 
@@ -55,6 +57,9 @@ export default class Homepage extends Component {
             '@Data:Monuments',
             JSON.stringify(res)
           )
+
+          this.isBluetoothOn();
+
           console.log(RNFS.DocumentDirectoryPath);
           let x = this.state.data.length-1;
           let y = this.state.data[x].monuments.length-1;
@@ -175,12 +180,23 @@ export default class Homepage extends Component {
   					if(err) {
   						console.error('Error loading monuments', err)
   					} else {
-  						const monuments = JSON.parse(dados)
-  						this.setState({
-  							data: monuments,
-                added: false,
-                enable: false,
-  						})
+              if(!dados){
+                console.log('Os dados estão vazios');
+                Alert.alert(
+                  'Dados insuficientes',
+                  'Por favor reinicie a aplicação e ligue a internet para a aplicação descarregar os dados necessários. Obrigado.',
+                  [
+                    {text: 'Compreendi', onPress: () => console.log('OK Pressed')},
+                  ],
+                )
+              } else {
+                const monuments = JSON.parse(dados)
+                this.setState({
+                  data: monuments,
+                  added: false,
+                  enable: false,
+                })
+              }
   					}
   				}
   			)
@@ -254,56 +270,58 @@ export default class Homepage extends Component {
       //Percorre todos os dados presentes no array data
       {this.state.data.map(i => i.monuments.map(j => j.pois.map((k, index) => {
         //Verifica se o uuid do beacon é igual a um dos beacons presente no array data (foi preenchido pelo ficheiro json)
-        if(k.beacon.uuid === beacons[0].uuid){
+        if(k.beacon !== null){
+          if(k.beacon.uuid === beacons[0].uuid){
 
-          //Só entra se o array dos acessos estiver vazio, logo será o primeiro acesso.
-          if(!this.state.acessos.length){
-            this.state.acessos.push({'uuid': beacons[0].uuid, 'date': date});
-            this.setState({acessos: this.state.acessos});
-            PushNotification.localNotificationSchedule({
-                message: k.name, // (required)
-                date: new Date(Date.now()),// (optional) for setting delay
-            });
-            this.postFunction(k); //Faz um post
+            //Só entra se o array dos acessos estiver vazio, logo será o primeiro acesso.
+            if(!this.state.acessos.length){
+              this.state.acessos.push({'uuid': beacons[0].uuid, 'date': date});
+              this.setState({acessos: this.state.acessos});
+              PushNotification.localNotificationSchedule({
+                  message: k.name, // (required)
+                  date: new Date(Date.now()),// (optional) for setting delay
+              });
+              this.postFunction(k); //Faz um post
 
-          //Caso já haja um acesso no array dos acessos então entra aqui
-          } else {
-              //Chama a função que remove elementos do array dos acessos. Vai verificar se os elementos
-              //que lá estão ainda estão dentro do seu TTL (Time To Live), caso algum não esteja será removido
-              this.removeElement();
+            //Caso já haja um acesso no array dos acessos então entra aqui
+            } else {
+                //Chama a função que remove elementos do array dos acessos. Vai verificar se os elementos
+                //que lá estão ainda estão dentro do seu TTL (Time To Live), caso algum não esteja será removido
+                this.removeElement();
 
-              //Percorre o array beacons
-              beacons.map ((beacon, indexBeacon) => {
-                //Percorre o array dos acessos
-                this.state.acessos.map ((acesso, indexAcesso) => {
+                //Percorre o array beacons
+                beacons.map ((beacon, indexBeacon) => {
+                  //Percorre o array dos acessos
+                  this.state.acessos.map ((acesso, indexAcesso) => {
 
-                  //Verifica se o uuid do beacon já está dentro do arrray dos acessos. Se tiver a flag 'acedeu' fica true.
-                  if (beacon.uuid === acesso.uuid){
-                    acedeu = true;
-                  }
+                    //Verifica se o uuid do beacon já está dentro do arrray dos acessos. Se tiver a flag 'acedeu' fica true.
+                    if (beacon.uuid === acesso.uuid){
+                      acedeu = true;
+                    }
 
-                  //Caso já esteja na ultima posição do array acessos e a flag 'acedeu' ainda estiver false
-                  //então é porque o beacon não está no array acessos logo será inserido
-                  if(indexAcesso === (this.state.acessos.length-1) && acedeu === false){
-                    this.state.acessos.push({'uuid': beacon.uuid, 'date': date});
-                    this.setState({acessos: this.state.acessos});
+                    //Caso já esteja na ultima posição do array acessos e a flag 'acedeu' ainda estiver false
+                    //então é porque o beacon não está no array acessos logo será inserido
+                    if(indexAcesso === (this.state.acessos.length-1) && acedeu === false){
+                      this.state.acessos.push({'uuid': beacon.uuid, 'date': date});
+                      this.setState({acessos: this.state.acessos});
 
-                    PushNotification.localNotificationSchedule({
-                      message: k.name, // (required)
-                      date: new Date(Date.now()),// (optional) for setting delay
-                    });
+                      PushNotification.localNotificationSchedule({
+                        message: k.name, // (required)
+                        date: new Date(Date.now()),// (optional) for setting delay
+                      });
 
-                    this.postFunction(k);
-                  }
+                      this.postFunction(k);
+                    }
 
-                  //Caso já esteja na ultima posição do array acessos e a flag 'acedeu' estiver true
-                  //então é porque o beacon já está no array acessos e não será inserido outra vez.
-                  //Mete-se a flag 'acedeu' a false e segue-se para o próximo beacon presente no array dos beacons.
-                  if(indexAcesso === (this.state.acessos.length-1) && acedeu === true){
-                      acedeu = false;
-                  }
+                    //Caso já esteja na ultima posição do array acessos e a flag 'acedeu' estiver true
+                    //então é porque o beacon já está no array acessos e não será inserido outra vez.
+                    //Mete-se a flag 'acedeu' a false e segue-se para o próximo beacon presente no array dos beacons.
+                    if(indexAcesso === (this.state.acessos.length-1) && acedeu === true){
+                        acedeu = false;
+                    }
+                })
               })
-            })
+            }
           }
         }
       })))}
@@ -341,6 +359,35 @@ export default class Homepage extends Component {
     })
   }
 
+  isBluetoothOn(){
+    BluetoothStatus.state()
+      .then((result) => {
+          if (result == false) {
+            Alert.alert(
+              'Bluetooth desligado',
+              'Se deseja que a aplicação o avise quando estiver perto de um Ponto de Interesse, ligue o Bluetooth. Obrigado.',
+              [
+                {text: 'Ligar Bluetooth', onPress: () => this.turnBluetoothOn()},
+                {text: 'Compreendi'}
+              ],
+            )
+          }
+      })
+  }
+
+  turnBluetoothOn(){
+    BluetoothStatus.enable(true)
+      .catch(() => {
+        Alert.alert(
+          'Falhou a ligar o Bluetooth',
+          'A aplicação não conseguiu ligar o Bluetooth.',
+          [
+            {text: 'Compreendi'},
+          ],
+        )
+      })
+  }
+
   ready(){
     if (this.state.added == false && this.state.enable == false) {
       return true
@@ -352,6 +399,7 @@ export default class Homepage extends Component {
 
   render(){
     const {navigate} = this.props.navigation;
+
 
     return (
       <Image source={require('../config/pictures/tomar_centro.jpg')} style={styles.container}>

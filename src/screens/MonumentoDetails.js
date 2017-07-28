@@ -8,14 +8,10 @@ import{
 	StatusBar,
 } from 'react-native';
 import {Tile, List, ListItem, Icon} from 'react-native-elements';
-import * as Animatable from 'react-native-animatable';
-import {changingColor} from '../config/myAnimations';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Swiper from 'react-native-swiper';
 import RNFS from 'react-native-fs';
+import HTMLView from 'react-native-htmlview';
 
-Touch = Animatable.createAnimatableComponent(TouchableHighlight);
 
 export default class museuDetails extends Component{
 
@@ -59,8 +55,12 @@ export default class museuDetails extends Component{
 										</View>
 
 										<View style={styles.bodyContent}>
-											<Text style={styles.bodyText}>{poi.description}</Text>
+											<HTMLView
+								        value={poi.description}
+								        stylesheet={styles}
+								      />
 										</View>
+
 
 									</ScrollView>
 								</View>
@@ -74,9 +74,6 @@ export default class museuDetails extends Component{
 	}
 }
 
-Animatable.initializeRegistryWithDefinitions({
-  changingColor: changingColor
-});
 
 const styles = StyleSheet.create({
 	container: {
